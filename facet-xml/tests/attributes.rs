@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, collections::HashMap};
 
 use facet::Facet;
 use facet_xml::{self as xml, from_str, to_string};
@@ -55,5 +55,45 @@ fn test_serialize_attribute_and_element_with_the_same_name() {
         })
         .unwrap(),
         r#"<root id="attribute"><id>element</id></root>"#,
+    );
+}
+
+#[test]
+fn test_deserialize_attributes_in_a_map() {
+    #[derive(Facet, Debug, PartialEq)]
+    #[facet(rename = "root")]
+    struct Root<'a> {
+        #[facet(xml::attributes, flatten)]
+        attributes: HashMap<String, Cow<'a, str>>,
+    }
+
+    assert_eq!(
+        from_str::<Root>(r#"<root x="x" y="y"><child>child</child></root>"#).unwrap(),
+        Root {
+            attributes: HashMap::from([
+                ("x".to_string(), Cow::Borrowed("x")),
+                ("y".to_string(), Cow::Borrowed("y")),
+            ])
+        }
+    );
+}
+
+#[test]
+fn test_deserialize_unknown_attributes_in_a_map() {
+    #[derive(Facet, Debug, PartialEq)]
+    #[facet(rename = "root")]
+    struct Root<'a> {
+        #[facet(xml::attribute)]
+        x: Cow<'a, str>,
+        #[facet(xml::attributes, flatten)]
+        attributes: HashMap<String, Cow<'a, str>>,
+    }
+
+    assert_eq!(
+        from_str::<Root>(r#"<root x="x" y="y"><child>child</child></root>"#).unwrap(),
+        Root {
+            x: Cow::Borrowed("x"),
+            attributes: HashMap::from([("y".to_string(), Cow::Borrowed("y")),])
+        }
     );
 }

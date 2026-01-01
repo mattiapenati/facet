@@ -206,6 +206,8 @@ facet::define_attr_grammar! {
         Elements,
         /// Marks a field as an XML attribute (on the element tag)
         Attribute,
+        /// Marks a field as collecting all XML attributes into a map
+        Attributes,
         /// Marks a field as the text content of the element
         Text,
         /// Marks a field as storing the XML element name dynamically

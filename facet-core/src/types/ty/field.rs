@@ -258,6 +258,14 @@ impl Field {
         self.has_attr(Some("kdl"), "node_name")
     }
 
+    /// Returns true if this field uses `xml::attributes` to collect all attributes.
+    ///
+    /// Check for `xml::attributes` attribute specifically.
+    #[inline]
+    pub fn is_attributes_plural(&self) -> bool {
+        self.has_attr(Some("xml"), "attributes") || self.has_attr(Some("html"), "attributes")
+    }
+
     /// Returns true if this field uses `kdl::arguments` (plural) to collect all arguments.
     ///
     /// Checks for `kdl::arguments` attribute specifically.

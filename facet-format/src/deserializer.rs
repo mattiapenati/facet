@@ -1767,6 +1767,21 @@ where
                         let field = &struct_def.fields[map_idx];
                         let is_option = matches!(field.shape().def, Def::Option(_));
 
+                        if field.is_attributes_plural()
+                            && !matches!(key.location, FieldLocationHint::Attribute)
+                        {
+                            if deny_unknown_fields {
+                                return Err(DeserializeError::UnknownField {
+                                    field: key.name.into_owned(),
+                                    span: self.last_span,
+                                    path: None,
+                                });
+                            }
+
+                            self.parser.skip_value().map_err(DeserializeError::Parser)?;
+                            continue;
+                        }
+
                         // Navigate to the map field
                         if !fields_set[map_idx] {
                             // First time - need to initialize the map
